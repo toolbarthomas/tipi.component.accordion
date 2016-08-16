@@ -1,0 +1,16 @@
+{
+  "name": "tipi.component.accordion",
+  "homepage": "https://github.com/toolbarthomas/tipi.component.accordion",
+  "authors": [
+    "Thomas van der Velde <contact@toolbarthomas.net>"
+  ],
+  "description": "Accordion component for Tipi",
+  "keywords": [
+    "toolbarthomas",
+    "modular",
+    "tipi",
+    "accordion"
+  ],
+  "license": "MIT",
+  "main": "_tipi.component.accordion.scss"
+}
