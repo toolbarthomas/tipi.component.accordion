@@ -1,8 +1,4 @@
 @mixin core-accordion {
-	.accordion {
-
-	}
-
 	.accordion-item {
 		@if $accordion-item-border != false {
 			border: $accordion-item-border;
@@ -16,6 +12,8 @@
 			@if $accordion-item-spacing != false {
 				border-radius: $accordion-item-border-radius;
 			} @else {
+				border-radius: $accordion-item-border-radius;
+
 				&:first-child {
 					border-bottom-right-radius: 0;
 					border-bottom-left-radius: 0;

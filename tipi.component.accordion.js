@@ -63,11 +63,11 @@ function setAccordion() {
 		});
 
 		accordion.each(function() {
-			var accordion = $(this);
-			var accordionItem = getAccordionElement(accordion, 'item', accordionElements);
+			var accordionEach = $(this);
+			var accordionItem = getAccordionElement(accordionEach, 'item', accordionElements);
 
 			if(accordionItem.length > 1) {
-				accordion.addClass(accordionStates.ready);
+				accordionEach.addClass(accordionStates.ready);
 				accordionItem.addClass(accordionStates.itemReady);
 
 				// var accordionOptions = {
@@ -77,27 +77,26 @@ function setAccordion() {
 				// };
 
 				//@startAt: Set an active state on a single or multiple accordion items
-				var optionStartAt = accordion.data(accordionDataAttributes.startAt);
-				if(typeof optionStartAt != 'undefined') {
-					if(parseInt(optionStartAt) != 'NaN') {
-						accordionOptions.startAt = optionStartAt;
+				var isStartat = accordionEach.data(accordionDataAttributes.startAt);
+				if(typeof isStartat != 'undefined') {
+					if(parseInt(isStartat) != 'NaN') {
+						accordionOptions.startAt = isStartat;
 					}
 				}
 
 				//@multiple: Open multiple accordion items within a single accordion.
-				var optionMultiple = accordion.data(accordionDataAttributes.startAt);
-				if(typeof optionMultiple === 'boolean') {
-					accordionOptions.multiple = optionMultiple;
+				var isMultiple = accordionEach.data(accordionDataAttributes.startAt);
+				if(typeof isMultiple === 'boolean') {
+					accordionOptions.multiple = isMultiple;
 				}
 
-				var accordionItemToggle = getAccordionElement(accordion, 'toggle', accordionElements).not('.' + accordionStates.toggleReady);
+				var accordionItemToggle = getAccordionElement(accordionEach, 'toggle', accordionElements).not('.' + accordionStates.toggleReady);
 				accordionItemToggle.addClass(accordionStates.toggleReady);
 
 				if (typeof accordionItemToggle != 'undefined') {
 					accordionItemToggle.on({
 						click : function(event) {
 							var toggle = $(this);
-							var accordion = getAccordionElement(toggle, 'root', accordionElements);
 
 							//Check if the toggle is within an active accordion
 							if(accordion.hasClass(accordionStates.ready)) {
@@ -105,8 +104,8 @@ function setAccordion() {
 
 								var index = toggle.parents('.' + accordionElements.item).first().index();
 
-								accordion.trigger('tipi.accordion.toggle', [accordion, index]);
-								accordion.trigger('tipi.accordion.resize', [accordion, index]);
+								accordion.trigger('tipi.accordion.toggle', [getAccordionElement(toggle, 'root', accordionElements), index]);
+								accordion.trigger('tipi.accordion.resize', [getAccordionElement(toggle, 'root', accordionElements), index]);
 							}
 						}
 					});
@@ -181,6 +180,20 @@ function resizeAccordionItem(accordion, index, accordionElements, accordionState
 		var accordionContent = getAccordionElement(accordionItem, 'content', accordionElements);
 		var accordionContentWrapper = getAccordionElement(accordionItem, 'contentWrapper', accordionElements);
 
+		//Check the current accordionItem has a parentItem
+		var accordionItemParent = accordionItem.parents('.' + accordionElements.item).first();
+		if(accordionItemParent.length > 0) {
+			var accordionItemParentContent = getAccordionElement(accordionItemParent, 'content', accordionElements);
+			var height = accordionItemParentContent.outerHeight();
+
+			if(height > 0) {
+				accordionItemParentContent.css({
+					'height' : 'auto',
+					'min-height' : height
+				});
+			}
+		}
+
 		if(accordionItem.hasClass(accordionStates.itemActive)) {
 			accordionContent.css({
 				'height' : accordionContentWrapper.outerHeight()
@@ -191,7 +204,7 @@ function resizeAccordionItem(accordion, index, accordionElements, accordionState
 			});
 		}
 
-		//resizeAccordionItemParent(accordion, accordionItem, accordionContent, accordionContentWrapper, accordionElements);
+		// resizeAccordionItemParent(accordion, accordionItem, accordionContent, accordionContentWrapper, accordionElements);
 	});
 }
 
@@ -207,6 +220,8 @@ function resizeAccordionItemParent(accordion, accordionItem, accordionContent, a
 				var accordionParent = getAccordionElement(accordion, 'root', accordionElements);
 				if(typeof accordionParent != 'undefined') {
 					accordion.trigger('tipi.accordion.resize', [accordionParent]);
+
+					console.log('aa');
 				}
 			}
 		}, 25);
