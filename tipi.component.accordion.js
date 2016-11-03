@@ -220,8 +220,6 @@ function resizeAccordionItemParent(accordion, accordionItem, accordionContent, a
 				var accordionParent = getAccordionElement(accordion, 'root', accordionElements);
 				if(typeof accordionParent != 'undefined') {
 					accordion.trigger('tipi.accordion.resize', [accordionParent]);
-
-					console.log('aa');
 				}
 			}
 		}, 25);
