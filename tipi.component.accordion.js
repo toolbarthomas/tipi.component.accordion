@@ -66,69 +66,72 @@ function setAccordion() {
 			var accordionEach = $(this);
 			var accordionItem = getAccordionElement(accordionEach, 'item', accordionElements);
 
-			if(accordionItem.length > 1) {
-				accordionEach.addClass(accordionStates.ready);
-				accordionItem.addClass(accordionStates.itemReady);
+			if(accordionItem.length == 0)
+			{
+				return;
+			}
+			accordionEach.addClass(accordionStates.ready);
+			accordionItem.addClass(accordionStates.itemReady);
 
-				// var accordionOptions = {
-				// 	startAt : false,
-				// 	multiple : false,
-				// 	timeout: 250
-				// };
+			// var accordionOptions = {
+			// 	startAt : false,
+			// 	multiple : false,
+			// 	timeout: 250
+			// };
 
-				//@startAt: Set an active state on a single or multiple accordion items
-				var isStartat = accordionEach.data(accordionDataAttributes.startAt);
-				if(typeof isStartat != 'undefined') {
-					if(parseInt(isStartat) != 'NaN') {
-						accordionOptions.startAt = isStartat;
-					}
+			//@startAt: Set an active state on a single or multiple accordion items
+			var isStartat = accordionEach.data(accordionDataAttributes.startAt);
+			if(typeof isStartat != 'undefined') {
+				if(parseInt(isStartat) != 'NaN') {
+					accordionOptions.startAt = isStartat;
 				}
+			}
 
-				//@multiple: Open multiple accordion items within a single accordion.
-				var isMultiple = accordionEach.data(accordionDataAttributes.startAt);
-				if(typeof isMultiple === 'boolean') {
-					accordionOptions.multiple = isMultiple;
-				}
+			//@multiple: Open multiple accordion items within a single accordion.
+			var isMultiple = accordionEach.data(accordionDataAttributes.startAt);
+			if(typeof isMultiple === 'boolean') {
+				accordionOptions.multiple = isMultiple;
+			}
 
-				var accordionItemToggle = getAccordionElement(accordionEach, 'toggle', accordionElements).not('.' + accordionStates.toggleReady);
-				accordionItemToggle.addClass(accordionStates.toggleReady);
+			var accordionItemToggle = getAccordionElement(accordionEach, 'toggle', accordionElements).not('.' + accordionStates.toggleReady);
+			accordionItemToggle.addClass(accordionStates.toggleReady);
 
-				if (typeof accordionItemToggle != 'undefined') {
-					accordionItemToggle.on({
-						click : function(event) {
-							var toggle = $(this);
+			if (typeof accordionItemToggle != 'undefined') {
+				accordionItemToggle.on({
+					click : function(event) {
+						var toggle = $(this);
+						var accordion = getAccordionElement(toggle, 'root', accordionElements);
 
-							//Check if the toggle is within an active accordion
-							if(accordion.hasClass(accordionStates.ready)) {
-								event.preventDefault();
+						//Check if the toggle is within an active accordion
+						if(accordion.hasClass(accordionStates.ready)) {
+							event.preventDefault();
 
-								var index = toggle.parents('.' + accordionElements.item).first().index();
+							var index = toggle.parents('.' + accordionElements.item).first().index();
 
-								accordion.trigger('tipi.accordion.toggle', [getAccordionElement(toggle, 'root', accordionElements), index]);
-								accordion.trigger('tipi.accordion.resize', [getAccordionElement(toggle, 'root', accordionElements), index]);
-							}
+							accordion.trigger('tipi.accordion.toggle', [getAccordionElement(toggle, 'root', accordionElements), index]);
+							accordion.trigger('tipi.accordion.resize', [getAccordionElement(toggle, 'root', accordionElements), index]);
 						}
-					});
-				}
-
-				var accordionEvent;
-				$(window).on({
-					resize : function() {
-						clearTimeout(accordionEvent);
-						accordionEvent = setTimeout(function() {
-							accordion.trigger('tipi.accordion.resize', [accordion])
-						}, 100);
 					}
 				});
+			}
 
-				if(accordionOptions.startAt !== false) {
-					accordion.trigger('tipi.accordion.resize', [accordion]);
-
-					accordion.trigger('tipi.accordion.open', [accordion, accordionOptions.startAt]);
-					accordion.trigger('tipi.accordion.resize', [accordion, accordionOptions.startAt]);
-				} else {
-					accordion.trigger('tipi.accordion.resize', [accordion])
+			var accordionEvent;
+			$(window).on({
+				resize : function() {
+					clearTimeout(accordionEvent);
+					accordionEvent = setTimeout(function() {
+						accordion.trigger('tipi.accordion.resize', [accordion])
+					}, 100);
 				}
+			});
+
+			if(accordionOptions.startAt !== false) {
+				accordion.trigger('tipi.accordion.resize', [accordion]);
+
+				accordion.trigger('tipi.accordion.open', [accordion, accordionOptions.startAt]);
+				accordion.trigger('tipi.accordion.resize', [accordion, accordionOptions.startAt]);
+			} else {
+				accordion.trigger('tipi.accordion.resize', [accordion])
 			}
 		});
 	}
