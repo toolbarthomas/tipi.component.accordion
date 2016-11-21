@@ -62,6 +62,16 @@ function setAccordion() {
 			}
 		});
 
+		var accordionEvent;
+		$(window).on({
+			resize : function() {
+				clearTimeout(accordionEvent);
+				accordionEvent = setTimeout(function() {
+					accordion.trigger('tipi.accordion.resize', [accordion])
+				}, 100);
+			}
+		});
+
 		accordion.each(function() {
 			var accordionEach = $(this);
 			var accordionItem = getAccordionElement(accordionEach, 'item', accordionElements);
@@ -115,23 +125,13 @@ function setAccordion() {
 				});
 			}
 
-			var accordionEvent;
-			$(window).on({
-				resize : function() {
-					clearTimeout(accordionEvent);
-					accordionEvent = setTimeout(function() {
-						accordion.trigger('tipi.accordion.resize', [accordion])
-					}, 100);
-				}
-			});
-
 			if(accordionOptions.startAt !== false) {
-				accordion.trigger('tipi.accordion.resize', [accordion]);
+				accordionEach.trigger('tipi.accordion.resize', [accordionEach]);
 
-				accordion.trigger('tipi.accordion.open', [accordion, accordionOptions.startAt]);
-				accordion.trigger('tipi.accordion.resize', [accordion, accordionOptions.startAt]);
+				accordionEach.trigger('tipi.accordion.open', [accordionEach, accordionOptions.startAt]);
+				accordionEach.trigger('tipi.accordion.resize', [accordionEach, accordionOptions.startAt]);
 			} else {
-				accordion.trigger('tipi.accordion.resize', [accordion])
+				accordionEach.trigger('tipi.accordion.resize', [accordionEach])
 			}
 		});
 	}
