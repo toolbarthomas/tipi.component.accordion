@@ -1,286 +1,192 @@
-function setAccordion() {
-	var accordionElements = {
-		root : 'accordion',
-		item : 'accordion-item',
-		header: 'accordion-item-header',
-		headerWrapper : 'accordion-item-header-wrapper',
-		content : 'accordion-item-content',
-		contentWrapper: 'accordion-item-content-wrapper',
-		toggle: 'accordion-item-toggle',
-	}
+(function($) {
 
-	var accordionStates = {
-		ready : '__accordion--ready',
-		itemReady : '__accordion-item--ready',
-		itemActive : '__accordion-item--active',
-		toggleReady : '__accordion-item-toggle--ready'
-	}
+	var doc = $(document);
 
-	var accordionDataAttributes = {
-		startAt : 'accordion-start-at',
-		multiple : 'accordion-multiple'
-	}
-
-	var accordionOptions = {
-		startAt : false,
-		multiple : false,
-		timeout: 250
-	};
-
-	var accordion = $('.' + accordionElements.root).not('.' + accordionStates.ready);
-	if(accordion.length > 0) {
-
-		accordion.on({
-			'tipi.accordion.toggle' : function(event, accordion, index) {
-
-				if(typeof accordion != 'undefined') {
-					if(accordion.length > 0) {
-						toggleAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions);
-					}
-				}
+	window.setAccordion = function()
+	{
+		var data = {
+			elements : {
+				root : 'accordion',
+				item : 'accordion-item',
+				toggle: 'accordion-item-toggle'
 			},
-			'tipi.accordion.open' : function(event, accordion, index) {
-				if(typeof accordion != 'undefined') {
-					if(accordion.length > 0) {
-						openAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions);
-					}
-				}
+			states : {
+				ready : '__accordion--ready',
+				item_ready : '__accordion-item--ready',
+				item_active : '__accordion-item--active'
 			},
-			'tipi.accordion.close' : function(event, accordion, index) {
-				if(typeof accordion != 'undefined') {
-					if(accordion.length > 0) {
-						closeAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions);
-					}
-				}
+			attributes : {
+				start_at : 'accordion-start-at',
+				multiple : 'accordion-multiple'
+			}
+		}
+
+		var accordions = $('.' + data.elements.root).not('.' + data.states.ready);
+
+		if(accordions.length === 0)
+		{
+			return;
+		}
+
+		doc.on({
+			'tipi.accordion.toggle' : function(event, accordion, index, options) {
+				toggleAccordionItem(accordion, index, data, options);
 			},
-			'tipi.accordion.resize' : function(event, accordion, index) {
-				if(typeof accordion != 'undefined') {
-					if(accordion.length > 0) {
-						resizeAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions);
-					}
-				}
+			'tipi.accordion.open' : function(event, accordion, index, options) {
+				openAccordionItem(accordion, index, data, options);
+			},
+			'tipi.accordion.close' : function(event, accordion, index, options) {
+				closeAccordionItem(accordion, index, data, options);
 			}
 		});
 
-		var accordionEvent;
-		$(window).on({
-			resize : function() {
-				clearTimeout(accordionEvent);
-				accordionEvent = setTimeout(function() {
-					accordion.trigger('tipi.accordion.resize', [accordion])
-				}, 100);
-			}
-		});
+		accordions.each(function(i) {
+			var accordion = $(this);
+			var accordion_item = getAccordionElement(accordion, 'item', data);
+			var accordion_item_toggle = getAccordionElement(accordion, 'toggle', data);
 
-		accordion.each(function() {
-			var accordionEach = $(this);
-			var accordionItem = getAccordionElement(accordionEach, 'item', accordionElements);
-
-			if(accordionItem.length == 0)
+			if(accordion_item.length === 0 || accordion_item_toggle.length === 0)
 			{
 				return;
 			}
-			accordionEach.addClass(accordionStates.ready);
-			accordionItem.addClass(accordionStates.itemReady);
 
-			// var accordionOptions = {
-			// 	startAt : false,
-			// 	multiple : false,
-			// 	timeout: 250
-			// };
+			//Set the options for each accordion
+			var options = setAccordionOptions(accordion, data);
 
-			//@startAt: Set an active state on a single or multiple accordion items
-			var isStartat = accordionEach.data(accordionDataAttributes.startAt);
-			if(typeof isStartat != 'undefined') {
-				if(parseInt(isStartat) != 'NaN') {
-					accordionOptions.startAt = isStartat;
-				}
-			}
+			accordion_item_toggle.on({
+				click : function(event)
+				{
+					var toggle = $(this);
+					var accordion = getAccordionElement(toggle, 'root', data);
 
-			//@multiple: Open multiple accordion items within a single accordion.
-			var isMultiple = accordionEach.data(accordionDataAttributes.startAt);
-			if(typeof isMultiple === 'boolean') {
-				accordionOptions.multiple = isMultiple;
-			}
-
-			var accordionItemToggle = getAccordionElement(accordionEach, 'toggle', accordionElements).not('.' + accordionStates.toggleReady);
-			accordionItemToggle.addClass(accordionStates.toggleReady);
-
-			if (typeof accordionItemToggle != 'undefined') {
-				accordionItemToggle.on({
-					click : function(event) {
-						var toggle = $(this);
-						var accordion = getAccordionElement(toggle, 'root', accordionElements);
-
-						//Check if the toggle is within an active accordion
-						if(accordion.hasClass(accordionStates.ready)) {
-							event.preventDefault();
-
-							var index = toggle.parents('.' + accordionElements.item).first().index();
-
-							accordion.trigger('tipi.accordion.toggle', [getAccordionElement(toggle, 'root', accordionElements), index]);
-							accordion.trigger('tipi.accordion.resize', [getAccordionElement(toggle, 'root', accordionElements), index]);
-						}
+					//Don't proceed if the accordion is not ready
+					if(!accordion.hasClass(data.states.ready))
+					{
+						return;
 					}
-				});
+
+					event.preventDefault();
+					var index = toggle.parents('.' + data.elements.item).first().index();
+
+					doc.trigger('tipi.accordion.toggle', [accordion, index, options]);
+				}
+			});
+
+			if(options.start_at >= 0) {
+				doc.trigger('tipi.accordion.open', [accordion, options.start_at, options]);
 			}
 
-			if(accordionOptions.startAt !== false) {
-				accordionEach.trigger('tipi.accordion.resize', [accordionEach]);
-
-				accordionEach.trigger('tipi.accordion.open', [accordionEach, accordionOptions.startAt]);
-				accordionEach.trigger('tipi.accordion.resize', [accordionEach, accordionOptions.startAt]);
-			} else {
-				accordionEach.trigger('tipi.accordion.resize', [accordionEach])
-			}
+			//Add the ready classes
+			accordion_item.addClass(data.states.item_ready);
+			accordion.addClass(data.states.ready);
 		});
+
+		doc.trigger('tipi.accordion.render', [accordions]);
 	}
-}
 
-function toggleAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions) {
-	var accordionItem = getAccordionElement(accordion, 'item', accordionElements);
+	function toggleAccordionItem(accordion, index, data, options)
+	{
+		var item = getAccordionElement(accordion, 'item', data);
 
-	if(typeof accordionItem != 'undefined') {
-		if(accordionItem.length > 0) {
-			if(typeof accordionOptions.multiple != 'undefined') {
-				if(accordionOptions.multiple === true) {
-					accordionItem.eq(index).siblings().removeClass(accordionStates.itemActive);
-				}
-			}
-
-			accordionItem.eq(index).toggleClass(accordionStates.itemActive);
+		if(item.length === 0)
+		{
+			return;
 		}
+
+		if(options.multiple === false) {
+			item.eq(index).siblings().removeClass(data.states.item_active);
+		}
+
+		item.eq(index).toggleClass(data.states.item_active);
 	}
-}
 
-function closeAccordionItem(accordion, index, accordionElements, accordionStates) {
-	var accordionItem = getAccordionElement(accordion, 'item', accordionElements);
-	accordionItem = filterAccordionItem(accordionItem, index);
+	function openAccordionItem(accordion, index, data, options)
+	{
+		var item = getAccordionElement(accordion, 'item', data).eq(index);
 
-	//Loop trough all accordionItems and add the active class to them
-	accordionItem.each(function() {
-		$(this).removeClass(accordionStates.itemActive);
-	});
-}
-
-function openAccordionItem(accordion, index, accordionElements, accordionStates) {
-	var accordionItem = getAccordionElement(accordion, 'item', accordionElements);
-	accordionItem = filterAccordionItem(accordionItem, index);
-
-	//Loop trough all accordionItems and add the active class to them
-	accordionItem.each(function() {
-		$(this).addClass(accordionStates.itemActive);
-	});
-}
-
-function resizeAccordionItem(accordion, index, accordionElements, accordionStates, accordionOptions) {
-	var accordionItem = getAccordionElement(accordion, 'item', accordionElements);
-	accordionItem = filterAccordionItem(accordionItem, index);
-
-	//Loop trough all accordionItems.
-	accordionItem.each(function() {
-		var accordionItem = $(this);
-		var accordionContent = getAccordionElement(accordionItem, 'content', accordionElements);
-		var accordionContentWrapper = getAccordionElement(accordionItem, 'contentWrapper', accordionElements);
-
-		//Check the current accordionItem has a parentItem
-		var accordionItemParent = accordionItem.parents('.' + accordionElements.item).first();
-		if(accordionItemParent.length > 0) {
-			var accordionItemParentContent = getAccordionElement(accordionItemParent, 'content', accordionElements);
-			var height = accordionItemParentContent.outerHeight();
-
-			if(height > 0) {
-				accordionItemParentContent.css({
-					'height' : 'auto',
-					'min-height' : height
-				});
-			}
+		if(item.length === 0)
+		{
+			return;
 		}
 
-		if(accordionItem.hasClass(accordionStates.itemActive)) {
-			accordionContent.css({
-				'height' : accordionContentWrapper.outerHeight()
-			});
-		} else {
-			accordionContent.css({
-				'height' : 0
-			});
+		item.addClass(data.states.item_active);
+	}
+
+	function closeAccordionItem(accordion, index, data, options)
+	{
+		var item = getAccordionElement(accordion, 'item', data).eq(index);
+
+		if(item.length === 0)
+		{
+			return;
 		}
 
-		// resizeAccordionItemParent(accordion, accordionItem, accordionContent, accordionContentWrapper, accordionElements);
-	});
-}
+		item.removeClass(data.states.item_active);
+	}
 
-function resizeAccordionItemParent(accordion, accordionItem, accordionContent, accordionContentWrapper, accordionElements) {
-	accordionItem.each(function() {
-		var resizeInterval;
-		var check = 0;
+	function setAccordionOptions(accordion, data)
+	{
+		var options = {
+			multiple : false,
+			start_at : -1
+		}
 
-		resizeInterval = setInterval(function() {
-			if(accordionContent.outerHeight() != 0 && accordionContentWrapper.outerHeight() != accordionContent.outerHeight()) {
-				clearInterval(resizeInterval);
+		if(typeof accordion.data(data.attributes.multiple) != 'undefined')
+		{
+			options.multiple = true;
+		}
 
-				var accordionParent = getAccordionElement(accordion, 'root', accordionElements);
-				if(typeof accordionParent != 'undefined') {
-					accordion.trigger('tipi.accordion.resize', [accordionParent]);
-				}
+		//Set the starting index on the accordion
+		if(typeof accordion.data(data.attributes.start_at) != 'undefined')
+		{
+			if(parseInt(accordion.data(data.attributes.start_at)) === NaN) {
+				return;
 			}
-		}, 25);
-	});
-}
 
-function getAccordionElement(origin, type, accordionElements) {
-	if(typeof origin != 'undefined' && typeof type != 'undefined') {
-		var element;
+			options.start_at = parseInt(accordion.data(data.attributes.start_at));
+		}
+
+		return options;
+	}
+
+	function getAccordionElement(origin, type, data)
+	{
+		if(typeof origin == 'undefined' || typeof data.elements == 'undefined')
+		{
+			return;
+		}
+
+		var element = $();
 
 		switch(type) {
 			case 'root' :
-				element = origin.parents('.' + accordionElements.root).first();
+				element = origin.parents('.' + data.elements.root).first();
 				break;
 			case 'item' :
-				element = origin.find('.' + accordionElements.item).first().siblings().addBack();
-				break;
-			case 'header' :
-				element = origin.find('.' + accordionElements.header).first();
-				break;
-			case 'headerWrapper' :
-				element = origin.find('.' + accordionElements.headerWrapper).first();
-				break;
-			case 'content' :
-				element = origin.find('.' + accordionElements.content).first();
-				break;
-			case 'contentWrapper' :
-				element = origin.find('.' + accordionElements.contentWrapper).first();
+				element = origin.find('.' + data.elements.item).first().siblings().addBack();
 				break;
 			case 'toggle' :
-				element = origin.find('.' + accordionElements.toggle);
+				var toggles = origin.find('.' + data.elements.toggle);
+
+				//Loop through all toggles so we can filter out the nested ones
+				toggles.each(function() {
+					var toggle = $(this);
+					var accordion = toggle.parents('.' + data.elements.root).first();
+
+					//If the traversed accordion is the same as our origin (accordion)
+					if(!accordion.is(origin))
+					{
+						return;
+					}
+
+					element = element.add(toggle);
+				});
+
 				break;
+			default:
 		}
 
 		return element;
 	}
-}
 
-function filterAccordionItem(accordionItem, index) {
-	//Select all accordion items if we have defined a certain index.
-	if(typeof index != 'undefined') {
-		//Convert the index to a string so we can always convert it to an array.
-		if (typeof index != 'string') {
-			index = index.toString();
-		}
-
-		//Splite the index values at the comma so we can loop trough them
-		index = index.replace(', ', ',');
-		index = index.split(',');
-		if(index.length > 0) {
-			var item = $([]);
-			for (var i = 0; i <= index.length - 1; i++) {
-				item.push(accordionItem.eq(index[i]));
-			}
-		}
-	} else {
-		item = accordionItem;
-	}
-
-	return item;
-}
+})(window.jQuery);
