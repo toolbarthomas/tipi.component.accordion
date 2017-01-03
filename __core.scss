@@ -44,34 +44,39 @@
 		}
 	}
 
+	.accordion-item-toggle {
+		.__accordion--ready & {
+			@include user-select(none);
+			cursor: pointer;
+		}
+	}
+
 	.accordion-item-content {
 		.__accordion-item--ready > & {
 			position: relative;
-			height: 0;
 
 			@if $accordion-transition {
+				height: 0;
 				opacity: 0;
 				visibility: hidden;
 				overflow: hidden;
 
 				@include transition(
-					(height $accordion-transition-speed $accordion-transition-timing $accordion-transition-timeout),
 					(opacity $accordion-transition-speed $accordion-transition-timing $accordion-transition-timeout),
-					(visibility 0s $accordion-transition-timing $accordion-transition-speed)
+					(visibility 0s linear $accordion-transition-speed)
 				);
 			} @else {
 				display: none;
 			}
-
 		}
 
 		.__accordion-item--active > & {
 			@if $accordion-transition {
+				height: auto;
 				opacity: 1;
 				visibility: visible;
 
 				@include transition(
-					(height $accordion-transition-speed $accordion-transition-timing $accordion-transition-timeout),
 					(opacity $accordion-transition-speed $accordion-transition-timing $accordion-transition-timeout),
 					(visibility 0s linear 0s)
 				);
