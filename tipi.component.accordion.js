@@ -1,13 +1,12 @@
-(function($) {
-
-	var doc = $(document);
-
+(function(win, doc, $) {
 	window.setAccordion = function()
 	{
 		var data = {
 			elements : {
 				root : 'accordion',
 				item : 'accordion-item',
+				content: 'accordion-item-content',
+				content_wrapper : 'accordion-item-content-wrapper',
 				toggle: 'accordion-item-toggle'
 			},
 			states : {
@@ -51,7 +50,7 @@
 			}
 
 			//Set the options for each accordion
-			var options = setAccordionOptions(accordion, data);
+			var options = getAccordionOptions(accordion, data);
 
 			accordion_item_toggle.on({
 				click : function(event)
@@ -69,19 +68,20 @@
 					var index = toggle.parents('.' + data.elements.item).first().index();
 
 					doc.trigger('tipi.accordion.toggle', [accordion, index, options]);
+					doc.trigger('tipi.accordion.resize', [accordion]);
 				}
 			});
 
-			if(options.start_at >= 0) {
-				doc.trigger('tipi.accordion.open', [accordion, options.start_at, options]);
+			for (var i = 0; i < options.start_at.length; i++) {
+				if(options.start_at[i] >= 0) {
+					doc.trigger('tipi.accordion.open', [accordion, options.start_at[i], options]);
+				}
 			}
 
 			//Add the ready classes
 			accordion_item.addClass(data.states.item_ready);
 			accordion.addClass(data.states.ready);
 		});
-
-		doc.trigger('tipi.accordion.render', [accordions]);
 	}
 
 	function toggleAccordionItem(accordion, index, data, options)
@@ -124,11 +124,11 @@
 		item.removeClass(data.states.item_active);
 	}
 
-	function setAccordionOptions(accordion, data)
+	function getAccordionOptions(accordion, data)
 	{
 		var options = {
 			multiple : false,
-			start_at : -1
+			start_at : [-1]
 		}
 
 		if(typeof accordion.data(data.attributes.multiple) != 'undefined')
@@ -139,11 +139,28 @@
 		//Set the starting index on the accordion
 		if(typeof accordion.data(data.attributes.start_at) != 'undefined')
 		{
-			if(parseInt(accordion.data(data.attributes.start_at)) === NaN) {
-				return;
+			//Store the starting indexes
+			var indexes = String(accordion.data(data.attributes.start_at));
+			indexes = indexes.replace(' ', '');
+			indexes = indexes.split(',');
+
+			var values = [];
+
+			//Loop trough all indexes
+			for (var i = 0; i < indexes.length; i++) {
+				var index = parseInt(indexes[i]);
+				if(index === NaN) {
+					break;
+				}
+
+				values.push(index);
 			}
 
-			options.start_at = parseInt(accordion.data(data.attributes.start_at));
+
+			if(values.length > 0)
+			{
+				options.start_at = values;
+			}
 		}
 
 		return options;
@@ -164,6 +181,12 @@
 				break;
 			case 'item' :
 				element = origin.find('.' + data.elements.item).first().siblings().addBack();
+				break;
+			case 'content' :
+				element = origin.find('.' + data.elements.content).first();
+				break;
+			case 'wrapper' :
+				element = origin.find('.' + data.elements.content_wrapper).first();
 				break;
 			case 'toggle' :
 				var toggles = origin.find('.' + data.elements.toggle);
@@ -189,4 +212,4 @@
 		return element;
 	}
 
-})(window.jQuery);
+})( window.jQuery(window), window.jQuery(document), window.jQuery);
