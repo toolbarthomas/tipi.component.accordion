@@ -1,44 +1,47 @@
 @mixin core-accordion {
-	.accordion-item {
-		@if $accordion-item-border != false {
-			border: $accordion-item-border;
-		}
+	@if $accordion-base-style != false
+	{
+		.accordion-item {
+			@if $accordion-item-border != false {
+				border: $accordion-item-border;
+			}
 
-		@if $accordion-item-gutter != false {
-			padding: $accordion-item-gutter;
-		}
+			@if $accordion-item-gutter != false {
+				padding: $accordion-item-gutter;
+			}
 
-		@if $accordion-item-border-radius > 0 {
-			@if $accordion-item-spacing != false {
-				border-radius: $accordion-item-border-radius;
-			} @else {
-				&:first-child {
-					border-top-left-radius: $accordion-item-border-radius;
-					border-top-right-radius: $accordion-item-border-radius;
-					border-bottom-right-radius: 0;
-					border-bottom-left-radius: 0;
-				}
-
-				&:last-child {
-					border-top-right-radius: 0;
-					border-top-left-radius: 0;
-					border-bottom-left-radius: $accordion-item-border-radius;
-					border-bottom-right-radius: $accordion-item-border-radius;
-				}
-
-				&:only-child {
+			@if $accordion-item-border-radius > 0 {
+				@if $accordion-item-spacing != false {
 					border-radius: $accordion-item-border-radius;
+				} @else {
+					&:first-child {
+						border-top-left-radius: $accordion-item-border-radius;
+						border-top-right-radius: $accordion-item-border-radius;
+						border-bottom-right-radius: 0;
+						border-bottom-left-radius: 0;
+					}
+
+					&:last-child {
+						border-top-right-radius: 0;
+						border-top-left-radius: 0;
+						border-bottom-left-radius: $accordion-item-border-radius;
+						border-bottom-right-radius: $accordion-item-border-radius;
+					}
+
+					&:only-child {
+						border-radius: $accordion-item-border-radius;
+					}
 				}
 			}
-		}
 
 
-		+ .accordion-item {
-			@if $accordion-item-spacing != false {
-				margin-top: $accordion-item-spacing;
-			} @else {
-				@if $accordion-item-border != false {
-					border-top: 0;
+			+ .accordion-item {
+				@if $accordion-item-spacing != false {
+					margin-top: $accordion-item-spacing;
+				} @else {
+					@if $accordion-item-border != false {
+						border-top: 0;
+					}
 				}
 			}
 		}
